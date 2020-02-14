@@ -39,5 +39,49 @@ public class NeuralNetwork : MonoBehaviour
             Matrix<float> hiddenToHidden = Matrix<float>.Build.Dense(hiddenNeuronCount, hiddenNeuronCount);
             weights.Add(hiddenToHidden);
         }
+
+        Matrix<float> outputWeight = Matrix<float>.Build.Dense(hiddenNeuronCount, 2);
+        weights.Add(outputWeight);
+        biases.Add(Random.Range(-1, 1));
+
+        RandomiseWeights();
+    }
+
+    private void RandomiseWeights()
+    {
+        for (int i = 0; i < weights.Count; i++)
+        {
+            for (int j = 0; j < weights[i].RowCount; j++)
+            {
+                for (int k = 0; k < weights[i].ColumnCount; k++)
+                {
+                    weights[i][j, k] = Random.Range(-1, 1);
+                }
+            }
+        }
+    }
+
+    public (float, float) RunNetwork(float a, float b, float c)
+    {
+        inputLayer[0, 0] = a;
+        inputLayer[0, 1] = b;
+        inputLayer[0, 2] = c;
+
+        inputLayer = inputLayer.PointwiseTanh();
+
+        for (int i = 0; i < hiddenLayers.Count; i++)
+        {
+            hiddenLayers[0] = ((hiddenLayers[i - 1] * weights[i]) + biases[i]).PointwiseTanh();
+        }
+
+        outputLayer = ((hiddenLayers[hiddenLayers.Count - 1] * weights[weights.Count - 1]) + biases[biases.Count - 1])
+            .PointwiseTanh();
+
+        return (sigmoid(outputLayer[0, 0]), (float) Math.Tanh(outputLayer[0, 1]));
+    }
+
+    private float sigmoid(float s)
+    {
+        return (1 / (1 + Mathf.Exp(-s)));
     }
 }

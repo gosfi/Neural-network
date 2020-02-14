@@ -6,11 +6,14 @@ using UnityEngine;
 public class CarController : MonoBehaviour
 {
     private Vector3 startPos, startRotation;
-
+    private NeuralNetwork _neuralNetwork;
     [Range(-1, 1)] public float a, t;
 
     public float timeSinceStart = 0f;
 
+    [Header("Network Options")] public int Layers = 1;
+    
+    
     [Header("Fitness")] public float ovrlFitness;
     public float distanceMultiplier;
     public float avrgSpeedMultiplier = 0.2f;
