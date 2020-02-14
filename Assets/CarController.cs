@@ -14,6 +14,7 @@ public class CarController : MonoBehaviour
     [Header("Fitness")] public float ovrlFitness;
     public float distanceMultiplier;
     public float avrgSpeedMultiplier = 0.2f;
+    public float sensorMultiplier = 0.1f;
 
     private Vector3 lastPos;
     private float totalDistanceTravel;
@@ -40,11 +41,36 @@ public class CarController : MonoBehaviour
         transform.eulerAngles = startRotation;
     }
 
+    private void FixedUpdate()
+    {
+        InputSensors();
+        lastPos = transform.position;
+
+        MoveCar(a, t);
+        timeSinceStart += Time.fixedDeltaTime;
+
+        calculateFitness();
+    }
+
     private void calculateFitness()
     {
-        
+        totalDistanceTravel += Vector3.Distance(transform.position, lastPos);
+        avgSpeed = totalDistanceTravel / timeSinceStart;
+
+        ovrlFitness = (totalDistanceTravel * distanceMultiplier) + (avgSpeed * avrgSpeedMultiplier) +
+                      (((aSensor + bSensor + cSensor) / 3) * sensorMultiplier);
+
+        if (timeSinceStart > 20 && ovrlFitness < 40)
+        {
+            Restart();
+        }
+
+        if (ovrlFitness >= 1000)
+        {
+            Restart();
+        }
     }
-    
+
     private void InputSensors()
     {
         Vector3 a = (transform.forward + transform.right);
@@ -57,6 +83,7 @@ public class CarController : MonoBehaviour
         {
             aSensor = hit.distance / 20;
             print("A: " + aSensor);
+            Debug.DrawLine(r.origin, hit.point, Color.red);
         }
 
         r.direction = b;
@@ -64,13 +91,15 @@ public class CarController : MonoBehaviour
         {
             bSensor = hit.distance / 20;
             print("B: " + bSensor);
+            Debug.DrawLine(r.origin, hit.point, Color.blue);
         }
-        
+
         r.direction = c;
         if (Physics.Raycast(r, out hit))
         {
             bSensor = hit.distance / 20;
             print("C: " + cSensor);
+            Debug.DrawLine(r.origin, hit.point, Color.green);
         }
     }
 
